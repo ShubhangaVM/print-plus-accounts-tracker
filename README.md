@@ -35,4 +35,4 @@ This application was created to help manage a small printing shop's daily transa
 This project was built as a practical tool for managing real buisness records digitally instead of manual bookkeeping.
 
 ## Dashboard Preview
-![Dashboard](Capture.png)
+![Dashboard](Capture.PNG)
