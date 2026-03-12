@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Edit Purchase</h2>
+    <p>Update purchase details.</p>
+  </div>
+  <div class="page-header-right">
+    <a class="btn btn-ghost btn-sm" href="/purchases">← Back</a>
+  </div>
+</div>
+
+<div class="card" style="max-width:780px;">
+  <div class="card-title">Purchase Details</div>
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" name="purchase_date" value="{{ p.purchase_date }}" required>
+      </div>
+      <div class="form-group">
+        <label>Seller *</label>
+        <select name="seller_id" required>
+          <option value="">— Select Seller —</option>
+          {% for s in sellers %}
+            <option value="{{ s.id }}" {% if s.id == p.seller_id %}selected{% endif %}>
+              {{ s.name }}{% if s.phone %} · {{ s.phone }}{% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select name="payment_method">
+          <option value="">— Select —</option>
+          {% for m in ["Cash","UPI","Cheque","UTR","NEFT","RTGS"] %}
+            <option {% if p.payment_method == m %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Payment Reference</label>
+        <input name="payment_ref" value="{{ p.payment_ref or '' }}" placeholder="UTR / Cheque No. / UPI Ref">
+      </div>
+      <div class="form-group">
+        <label>Bill No.</label>
+        <input name="bill_no" value="{{ p.bill_no or '' }}" placeholder="Optional">
+      </div>
+      <div class="form-group">
+        <label>Amount (₹) *</label>
+        <input type="number" step="0.01" min="0" name="amount" value="{{ p.amount }}" required>
+      </div>
+      <div class="form-group span-2">
+        <label>Product Description</label>
+        <textarea name="product_description">{{ p.product_description or '' }}</textarea>
+      </div>
+      <div class="form-group span-2">
+        <label>Notes</label>
+        <textarea name="notes">{{ p.notes or '' }}</textarea>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button type="submit" class="btn btn-primary">Update Purchase</button>
+      <a href="/purchases" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

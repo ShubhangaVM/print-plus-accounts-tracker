@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Collect Payment</h2>
+    <p>Record a payment against this bill.</p>
+  </div>
+  <div class="page-header-right">
+    <a class="btn btn-ghost btn-sm" href="/sales/pending">← Back to Pending</a>
+    <a class="btn btn-ghost btn-sm" href="/sales/invoice/{{ row.id }}" target="_blank">🖨️ Invoice</a>
+  </div>
+</div>
+
+<div class="grid-2">
+
+  <!-- Bill summary -->
+  <div class="card">
+    <div class="card-title">Bill Information</div>
+    <table>
+      <tbody>
+        <tr><td class="muted" style="width:40%">Customer</td><td><b>{{ row.customer_name }}</b></td></tr>
+        <tr><td class="muted">Bill No.</td><td><span class="mono">{{ row.bill_no }}</span></td></tr>
+        <tr><td class="muted">Bill Date</td><td>{{ row.sale_date }}</td></tr>
+        <tr><td class="muted">Age</td><td>
+          {% if due_days >= 30 %}
+            <span class="badge badge-red">{{ due_days }} days overdue</span>
+          {% elif due_days >= 7 %}
+            <span class="badge badge-amber">{{ due_days }} days old</span>
+          {% else %}
+            <span class="badge badge-gray">{{ due_days }} days old</span>
+          {% endif %}
+        </td></tr>
+      </tbody>
+    </table>
+    <hr>
+    <table>
+      <tbody>
+        <tr><td class="muted">Total Amount</td>    <td><b>₹ {{ "%.2f"|format(amount) }}</b></td></tr>
+        <tr><td class="muted">Already Paid</td>    <td style="color:var(--green)"><b>₹ {{ "%.2f"|format(paid) }}</b></td></tr>
+        <tr><td class="muted">Still Pending</td>   <td>
+          <span style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--amber)">
+            ₹ {{ "%.2f"|format(pending) }}
+          </span>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Payment form -->
+  <div class="card">
+    <div class="card-title">Record Payment</div>
+    {% if pending > 0 %}
+    <form method="POST">
+      <div class="form-grid form-grid-1">
+        <div class="form-group">
+          <label>Payment Amount (₹) *</label>
+          <input type="number" step="0.01" min="0.01" max="{{ pending }}" name="new_payment" required placeholder="Enter amount received">
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input type="text" name="payment_notes" placeholder="e.g. Cash, UPI Ref #123…">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button type="submit" class="btn btn-primary">Save Payment</button>
+        <form method="POST" action="/sales/payment/{{ row.id }}/markpaid" style="display:inline" onsubmit="return confirm('Mark entire remaining balance as paid?')">
+          <button type="submit" class="btn btn-success">✓ Mark Fully Paid</button>
+        </form>
+      </div>
+    </form>
+    {% else %}
+      <div class="empty" style="padding:30px 0;">
+        <div class="empty-icon">✅</div>
+        <p>This bill is fully paid.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if payment_history %}
+<div class="card">
+  <div class="card-title">Payment History</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Amount</th><th>Notes</th><th>Remove</th></tr>
+      </thead>
+      <tbody>
+        {% for p in payment_history %}
+        <tr>
+          <td>{{ p.payment_date }}</td>
+          <td><b>₹ {{ "%.2f"|format(p.amount) }}</b></td>
+          <td>{{ p.notes or "—" }}</td>
+          <td>
+            <form method="POST" action="/sales/payment/entry/delete/{{ p.id }}" onsubmit="return confirm('Remove this payment entry?')">
+              <button class="btn btn-danger btn-sm">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

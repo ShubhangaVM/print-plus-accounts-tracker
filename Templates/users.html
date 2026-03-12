@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>User Management</h2>
+<p class="muted">Only admins can see this page.</p>
+
+<div class="card">
+  <h3>Add New User</h3>
+  <form method="POST" class="form">
+    <input type="hidden" name="action" value="add">
+
+    <label>Username *</label>
+    <input type="text" name="username" required placeholder="Enter username">
+
+    <label>Password *</label>
+    <input type="password" name="password" required placeholder="Enter password">
+
+    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+      <input type="checkbox" name="is_admin" style="width:auto;">
+      Make this user an Admin
+    </label>
+
+    <button class="btn" type="submit">Add User</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>All Users</h3>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><b>{{ u["username"] }}</b></td>
+          <td>
+            {% if u["is_admin"] %}
+              <span style="color:#d97706; font-weight:700;">⭐ Admin</span>
+            {% else %}
+              User
+            {% endif %}
+          </td>
+          <td>
+            {% if u["username"] != session["username"] %}
+            <form method="POST" onsubmit="return confirm('Delete user {{ u[\'username\'] }}?');">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="user_id" value="{{ u['id'] }}">
+              <button class="btn btn-sm danger" type="submit">Delete</button>
+            </form>
+            {% else %}
+              <span class="muted">— (you)</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

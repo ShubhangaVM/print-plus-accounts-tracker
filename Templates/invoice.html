@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - {{ sale["bill_no"] }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 14px;
+      color: #1c1917;
+      background: #f5f5f5;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 20px auto;
+      background: white;
+      padding: 32px 36px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+
+    /* Header */
+    .inv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #1c1917;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .company-name { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+    .company-sub { font-size: 12px; color: #78716c; margin-top: 2px; }
+    .inv-label { font-size: 28px; font-weight: 900; color: #d97706; text-align:right; }
+    .inv-meta { text-align: right; font-size: 13px; color: #57534e; margin-top: 4px; }
+
+    /* Bill To */
+    .parties { display: flex; justify-content: space-between; margin-bottom: 24px; }
+    .party-block { width: 48%; }
+    .party-block h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a8a29e; margin-bottom: 6px; }
+    .party-block p { font-size: 14px; line-height: 1.6; }
+    .party-block .party-name { font-weight: 700; font-size: 16px; }
+
+    /* Summary Table */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th { background: #1c1917; color: white; padding: 10px 12px; text-align: left; font-size: 13px; }
+    td { padding: 10px 12px; border-bottom: 1px solid #e7e5e4; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Totals */
+    .totals { margin-left: auto; width: 280px; }
+    .totals table { margin-bottom: 0; }
+    .totals td { padding: 7px 12px; border: none; }
+    .totals td:last-child { text-align: right; font-weight: 600; }
+    .totals .total-row td { border-top: 2px solid #1c1917; font-size: 16px; font-weight: 900; }
+    .totals .pending-row td { color: #d97706; font-size: 15px; }
+    .totals .paid-row td { color: #16a34a; }
+
+    /* Payment History */
+    .payment-history { margin-top: 24px; }
+    .payment-history h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #57534e; }
+    .payment-history table th { background: #57534e; font-size: 12px; padding: 8px 10px; }
+    .payment-history table td { font-size: 13px; padding: 7px 10px; }
+
+    /* Footer */
+    .inv-footer {
+      margin-top: 40px;
+      border-top: 1px solid #e7e5e4;
+      padding-top: 16px;
+      font-size: 12px;
+      color: #a8a29e;
+      text-align: center;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-paid { background: #dcfce7; color: #16a34a; }
+    .badge-pending { background: #fef3c7; color: #b45309; }
+
+    /* Print button - hidden when printing */
+    .print-bar {
+      width: 210mm;
+      margin: 0 auto 12px auto;
+      display: flex;
+      gap: 8px;
+    }
+    .print-bar button, .print-bar a {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .print-bar .btn-print { background: #1c1917; color: white; }
+    .print-bar .btn-back { background: #e7e5e4; color: #1c1917; }
+
+    @media print {
+      body { background: white; }
+      .print-bar { display: none; }
+      .page { margin: 0; box-shadow: none; padding: 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-bar">
+  <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+  <button class="btn-back" onclick="window.close()">✕ Close Tab</button>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="inv-header">
+    <div>
+      <div class="company-name">Print Plus</div>
+      <div class="company-sub">Sales • Purchases • Pending Bills</div>
+    </div>
+    <div>
+      <div class="inv-label">INVOICE</div>
+      <div class="inv-meta">Bill No: <b>{{ sale["bill_no"] }}</b></div>
+      <div class="inv-meta">Date: <b>{{ sale["sale_date"] }}</b></div>
+      <div class="inv-meta">
+        Status:
+        {% if pending <= 0 %}
+          <span class="badge badge-paid">PAID</span>
+        {% else %}
+          <span class="badge badge-pending">PENDING</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Bill To -->
+  <div class="parties">
+    <div class="party-block">
+      <h4>Bill To</h4>
+      <p class="party-name">{{ sale["customer_name"] }}</p>
+      {% if sale["customer_phone"] %}
+        <p>📞 {{ sale["customer_phone"] }}</p>
+      {% endif %}
+      {% if sale["customer_address"] %}
+        <p>{{ sale["customer_address"] }}</p>
+      {% endif %}
+      {% if sale["customer_gst"] %}
+        <p>GST: {{ sale["customer_gst"] }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Bill Details -->
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Description</th>
+        <th style="text-align:right;">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>
+          Bill No. {{ sale["bill_no"] }}
+          {% if sale["notes"] %}
+            <br><span style="color:#78716c; font-size:13px;">{{ sale["notes"] }}</span>
+          {% endif %}
+        </td>
+        <td style="text-align:right;">₹ {{ "%.2f"|format(amount) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Totals -->
+  <div class="totals">
+    <table>
+      <tr>
+        <td>Total</td>
+        <td>₹ {{ "%.2f"|format(amount) }}</td>
+      </tr>
+      <tr class="paid-row">
+        <td>Paid</td>
+        <td>₹ {{ "%.2f"|format(paid) }}</td>
+      </tr>
+      <tr class="total-row {% if pending > 0 %}pending-row{% endif %}">
+        <td>Balance Due</td>
+        <td>₹ {{ "%.2f"|format(pending) }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Payment History -->
+  {% if payment_history %}
+  <div class="payment-history">
+    <h4>Payment History</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payment_history %}
+        <tr>
+          <td>{{ p["payment_date"] }}</td>
+          <td>₹ {{ "%.2f"|format(p["amount"]) }}</td>
+          <td>{{ p["notes"] or "-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <div class="inv-footer">
+    Thank you for your business! — Print Plus
+  </div>
+
+</div>
+</body>
+</html>

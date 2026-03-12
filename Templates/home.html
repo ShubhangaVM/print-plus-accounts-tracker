@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Dashboard</h2>
+    <p>Welcome back — here's a snapshot of your business.</p>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-row">
+  <a class="stat-card sc-amber" href="/sales/pending" style="display:block;text-decoration:none;color:inherit;">
+    <div class="stat-card-icon">⏳</div>
+    <div class="stat-card-label">Pending Bills</div>
+    <div class="stat-card-value">{{ pending_count }}</div>
+    <div class="stat-card-sub">bills awaiting payment</div>
+    <div class="stat-card-link">View all →</div>
+  </a>
+
+  <a class="stat-card {% if pending_total > 0 %}sc-red{% else %}sc-green{% endif %}" href="/sales/pending" style="display:block;text-decoration:none;color:inherit;">
+    <div class="stat-card-icon">💰</div>
+    <div class="stat-card-label">Total Pending</div>
+    <div class="stat-card-value">₹ {{ "%.0f"|format(pending_total) }}</div>
+    <div class="stat-card-sub">amount to be collected</div>
+    <div class="stat-card-link">Collect →</div>
+  </a>
+
+  <a class="stat-card sc-indigo" href="/sales" style="display:block;text-decoration:none;color:inherit;">
+    <div class="stat-card-icon">📅</div>
+    <div class="stat-card-label">Today's Sales</div>
+    <div class="stat-card-value">₹ {{ "%.0f"|format(today_total) }}</div>
+    <div class="stat-card-sub">billed today</div>
+    <div class="stat-card-link">View sales →</div>
+  </a>
+</div>
+
+<!-- Quick Actions -->
+<div class="grid-2">
+  <div class="action-card">
+    <h3>🧾 Sales</h3>
+    <p>Add new bills and track pending payments from customers.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary btn-sm" href="/sales/add">➕ Add Sale</a>
+      <a class="btn btn-ghost btn-sm" href="/sales/pending">⏳ Pending</a>
+      <a class="btn btn-ghost btn-sm" href="/sales">All Sales</a>
+    </div>
+  </div>
+
+  <div class="action-card">
+    <h3>🛒 Purchases</h3>
+    <p>Track purchases from sellers and log payment references.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary btn-sm" href="/purchases/add">➕ Add Purchase</a>
+      <a class="btn btn-ghost btn-sm" href="/purchases">View All</a>
+    </div>
+  </div>
+
+  <div class="action-card">
+    <h3>👥 Customers</h3>
+    <p>Add customers once, then pick them when creating a bill.</p>
+    <div class="btn-row">
+      <a class="btn btn-ghost btn-sm" href="/customers">Manage Customers</a>
+    </div>
+  </div>
+
+  <div class="action-card">
+    <h3>📊 Reports</h3>
+    <p>Monthly and yearly summaries — sales, purchases, profit.</p>
+    <div class="btn-row">
+      <a class="btn btn-ghost btn-sm" href="/reports">Open Reports</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

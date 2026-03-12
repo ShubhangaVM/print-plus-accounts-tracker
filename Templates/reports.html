@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Reports</h2>
+    <p>Sales, purchases, and profit summary.</p>
+  </div>
+  <div class="page-header-right">
+    <a class="btn btn-success btn-sm" href="/reports/export?year={{ selected_year }}&month={{ selected_month }}">⬇️ Export Excel</a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom:16px;">
+  <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+    <div class="form-group" style="min-width:120px;">
+      <label>Year</label>
+      <select name="year">
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="min-width:150px;">
+      <label>Month</label>
+      <select name="month">
+        <option value="">Full Year</option>
+        {% for val, name in months %}
+          <option value="{{ val }}" {% if val == selected_month %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Apply Filter</button>
+  </form>
+</div>
+
+<!-- Summary stats -->
+<div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+  <div class="stat-card sc-indigo">
+    <div class="stat-card-icon">🧾</div>
+    <div class="stat-card-label">Total Sales</div>
+    <div class="stat-card-value" style="font-size:20px;">₹ {{ "%.0f"|format(total_sales) }}</div>
+    <div class="stat-card-sub">{{ sales_count }} bills</div>
+  </div>
+  <div class="stat-card sc-green">
+    <div class="stat-card-icon">✅</div>
+    <div class="stat-card-label">Collected</div>
+    <div class="stat-card-value" style="font-size:20px;">₹ {{ "%.0f"|format(total_paid) }}</div>
+    <div class="stat-card-sub">amount received</div>
+  </div>
+  <div class="stat-card sc-amber">
+    <div class="stat-card-icon">⏳</div>
+    <div class="stat-card-label">Still Pending</div>
+    <div class="stat-card-value" style="font-size:20px;">₹ {{ "%.0f"|format(total_pending) }}</div>
+    <div class="stat-card-sub">to be collected</div>
+  </div>
+  <div class="stat-card {% if profit >= 0 %}sc-green{% else %}sc-red{% endif %}">
+    <div class="stat-card-icon">📈</div>
+    <div class="stat-card-label">Net Profit</div>
+    <div class="stat-card-value" style="font-size:20px;">₹ {{ "%.0f"|format(profit) }}</div>
+    <div class="stat-card-sub">sales − purchases</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Purchases summary -->
+  <div class="card">
+    <div class="card-title">Purchases Summary</div>
+    <table>
+      <tbody>
+        <tr><td class="muted">Total Purchases</td><td><b>₹ {{ "%.2f"|format(total_purchases) }}</b></td></tr>
+        <tr><td class="muted">No. of purchases</td><td>{{ purchases_count }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sales summary -->
+  <div class="card">
+    <div class="card-title">Sales Summary</div>
+    <table>
+      <tbody>
+        <tr><td class="muted">Gross Sales</td>    <td><b>₹ {{ "%.2f"|format(total_sales) }}</b></td></tr>
+        <tr><td class="muted">Collected</td>      <td style="color:var(--green)"><b>₹ {{ "%.2f"|format(total_paid) }}</b></td></tr>
+        <tr><td class="muted">Pending</td>        <td style="color:var(--amber)"><b>₹ {{ "%.2f"|format(total_pending) }}</b></td></tr>
+        <tr><td class="muted">Total Purchases</td><td style="color:var(--red)"><b>₹ {{ "%.2f"|format(total_purchases) }}</b></td></tr>
+        <tr><td class="muted"><b>Net Profit</b></td>
+          <td><b style="color:{% if profit>=0 %}var(--green){% else %}var(--red){% endif %}; font-size:16px;">
+            ₹ {{ "%.2f"|format(profit) }}
+          </b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Customer breakdown -->
+{% if customer_breakdown %}
+<div class="card">
+  <div class="card-title">Customer Breakdown</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Customer</th><th>Bills</th><th>Total Billed</th><th>Collected</th><th>Pending</th></tr>
+      </thead>
+      <tbody>
+        {% for c in customer_breakdown %}
+        <tr>
+          <td class="muted">{{ loop.index }}</td>
+          <td><b>{{ c.name }}</b></td>
+          <td>{{ c.bills }}</td>
+          <td>₹ {{ "%.2f"|format(c.total or 0) }}</td>
+          <td style="color:var(--green)">₹ {{ "%.2f"|format(c.paid or 0) }}</td>
+          <td>
+            {% if (c.pending or 0) > 0.01 %}
+              <span class="badge badge-amber">₹ {{ "%.2f"|format(c.pending) }}</span>
+            {% else %}
+              <span class="badge badge-green">Nil</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

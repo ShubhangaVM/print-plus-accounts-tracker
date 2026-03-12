@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Print Plus Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" onerror="this.style.display='none'">
+    <div>
+      <div class="sidebar-brand-name">Print Plus</div>
+      <div class="sidebar-brand-sub">Business Tracker</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="/"><span class="nav-ic">⊞</span> Dashboard</a>
+    <a href="/sales/pending"><span class="nav-ic">⏳</span> Pending Bills</a>
+
+    <div class="nav-section">Transactions</div>
+    <a href="/sales"><span class="nav-ic">🧾</span> Sales</a>
+    <a href="/purchases"><span class="nav-ic">🛒</span> Purchases</a>
+
+    <div class="nav-section">Contacts</div>
+    <a href="/customers"><span class="nav-ic">👥</span> Customers</a>
+    <a href="/sellers"><span class="nav-ic">🏪</span> Sellers</a>
+
+    <div class="nav-section">Analytics</div>
+    <a href="/reports"><span class="nav-ic">📊</span> Reports</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="/backup">💾 Backup Database</a>
+  </div>
+</aside>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <h1>Print Plus</h1>
+    <p>Sales · Purchases · Pending Bills</p>
+  </div>
+  <div class="topbar-right">
+    <a href="/sales/add" class="btn btn-primary btn-sm">➕ Add Sale</a>
+    <a href="/purchases/add" class="btn btn-ghost btn-sm">🛒 Add Purchase</a>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<div class="app-layout">
+  <div class="page">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, msg in messages %}
+            <div class="flash {{ category }}">
+              {% if category == 'success' %}✅{% else %}⚠️{% endif %}
+              {{ msg }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+  </div>
+</div>
+
+<script>
+  // Mark active nav link
+  const path = window.location.pathname;
+  document.querySelectorAll('.sidebar-nav a').forEach(a => {
+    const href = a.getAttribute('href');
+    if (href === path || (href !== '/' && path.startsWith(href))) {
+      a.classList.add('active');
+    }
+  });
+</script>
+
+</body>
+</html>

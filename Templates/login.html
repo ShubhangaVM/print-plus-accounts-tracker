@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Print Plus — Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+
+<div class="login-wrap">
+  <div class="login-header">
+    <div class="login-brand">🖨️ Print Plus</div>
+    <div class="login-sub">Business Tracker</div>
+  </div>
+
+  <div class="login-card">
+    <h2>Sign in to continue</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="form">
+      <label>Username</label>
+      <input type="text" name="username" required autofocus placeholder="Enter username">
+
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="Enter password">
+
+      <button class="btn-login" type="submit">Sign In →</button>
+    </form>
+  </div>
+
+  <div class="login-footer">Print Plus Tracker • For internal use only</div>
+</div>
+
+</body>
+</html>

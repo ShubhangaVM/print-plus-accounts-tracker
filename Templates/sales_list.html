@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>All Sales</h2>
+    <p>Complete history of every sale entry.</p>
+  </div>
+  <div class="page-header-right">
+    <a class="btn btn-ghost btn-sm" href="/sales/pending">⏳ Pending</a>
+    <a class="btn btn-primary btn-sm" href="/sales/add">➕ Add Sale</a>
+  </div>
+</div>
+
+<div class="card">
+  <form method="GET" class="search-row">
+    <input type="text" name="q" value="{{ q or '' }}" placeholder="🔍 Search by customer, bill no, notes…">
+    <button type="submit" class="btn btn-ghost btn-sm">Search</button>
+    {% if q %}<a href="/sales" class="btn btn-ghost btn-sm">✕ Clear</a>{% endif %}
+  </form>
+
+  {% if rows|length == 0 %}
+    <div class="empty">
+      <div class="empty-icon">🧾</div>
+      <p>{% if q %}No results for "{{ q }}".{% else %}No sales yet.{% endif %}</p>
+    </div>
+  {% else %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Customer</th><th>Bill No</th>
+          <th>Amount</th><th>Paid</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.sale_date }}</td>
+          <td><b>{{ r.customer_name }}</b></td>
+          <td><span class="mono">{{ r.bill_no }}</span></td>
+          <td>₹ {{ "%.2f"|format(r.amount) }}</td>
+          <td>₹ {{ "%.2f"|format(r.paid) }}</td>
+          <td>
+            {% if r.pending > 0.001 %}
+              <span class="badge badge-amber">₹ {{ "%.2f"|format(r.pending) }} due</span>
+            {% else %}
+              <span class="badge badge-green">Paid</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="btn-row">
+              <a class="btn btn-ghost btn-sm" href="/sales/payment/{{ r.id }}">Payment</a>
+              <a class="btn btn-ghost btn-sm" href="/sales/invoice/{{ r.id }}" target="_blank">Invoice</a>
+              <form method="POST" action="/sales/delete/{{ r.id }}" style="display:inline" onsubmit="return confirm('Delete this sale?')">
+                <button class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
